@@ -1,0 +1,9 @@
+name: ml
+channels:
+  - defaults
+dependencies:
+  - python>=3.10
+  - pip
+  - pip:
+      # optional, only for live LLM decisions
+      # - openai>=1.0

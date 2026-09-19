@@ -10,6 +10,13 @@ search is necessary." Uses Groq (`GROQ_API_KEY`, default model `llama-3.3-70b-ve
 stdlib call, real `usage` tokens) if set, else OpenAI, otherwise a result-dependent
 local policy (still decides per tool result, never a fixed search→search→answer sequence). Run: `python3 eval.py`, `python3 agent.py "<q>"`.
 
+## How the Agent Works
+
+User → Agent → Tool → Results → Agent → Answer / Search Again / Clarification.
+Each iteration the model returns `{"action": "search|answer|clarify", ...}` based on
+the previous tool result: weak/empty evidence triggers a reformulated search, no
+evidence after retries triggers clarification, sufficient evidence triggers the answer.
+
 ## Context Engineering Technique
 
 Retrieval result capping: `agent.py` keeps only the top 5 results per search and top 5
@@ -21,7 +28,8 @@ unnecessarily, so limiting the results keeps the agent's context manageable.
 Single-agent loop (`run_agent`, max 5 iterations): each iteration the model returns
 `{"action": "search|answer|clarify", "query", "reason"}` based on the previous tool
 result. One agent is enough — the task is a single decide-act-observe loop with one
-tool, so extra agents would add coordination with no benefit.
+tool, so extra agents would add unnecessary coordination and token overhead for this
+relatively focused task.
 
 ## Setup
 
@@ -74,7 +82,7 @@ flowchart TD
 ```
 (see also `architecture.mmd`)
 
-## Results
+## Evaluation Results
 
 | Query | Success | Iterations | Tool Calls | Tool OK | Tokens | Failure |
 |---|---|---:|---:|---|---:|---|
@@ -84,8 +92,9 @@ flowchart TD
 | What are the library opening hours? | Yes | 2 | 1 | Yes | 470 | - |
 | What does the warranty cover? | Yes | 2 | 1 | Yes | 313 | - |
 | Hi | Yes | 1 | 0 | Yes | 119 | - |
+| How do I get my money back? | Yes | 3 | 2 | Yes | 364 | - |
 
-Task completion rate = 6/6 = 100%
+Task completion rate = 7/7 = 100%
 
 Token note: without an API key, tokens use the closest reliable measure
 (~1 token / 4 chars, stated, not invented); with `GROQ_API_KEY` (or `OPENAI_API_KEY`)

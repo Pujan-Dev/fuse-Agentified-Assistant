@@ -1,0 +1,10 @@
+flowchart TD
+    User([User]) --> Q[Question]
+    Q --> Agent[Agent / LLM]
+    Agent --> D{Decision:\nsearch / answer / clarify}
+    D -- search --> Tool[RAG Tool\nTF-IDF search]
+    Tool --> Res[Results top-5 cap]
+    Res --> Agent
+    D -- clarify --> User
+    D -- answer --> User
+    Agent -. max 5 iters .-> D
