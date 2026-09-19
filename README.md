@@ -1,28 +1,5 @@
 # W16 Agentified Assistant
 
-## Overview
-
-Self-checking RAG research assistant. No W15 code existed in the repo, so `rag_tool.py`
-is the minimal W15 baseline (TF-IDF search, stdlib only) and `agent.py` adds the W16
-agentic loop on top. "A fixed pipeline is insufficient because the agent must decide
-from intermediate search results whether the evidence is sufficient or whether another
-search is necessary." Uses Groq (`GROQ_API_KEY`, default model `llama-3.3-70b-versatile`,
-stdlib call, real `usage` tokens) if set, else OpenAI, otherwise a result-dependent
-local policy (still decides per tool result, never a fixed search→search→answer sequence). Run: `python3 eval.py`, `python3 agent.py "<q>"`.
-
-## How the Agent Works
-
-User → Agent → Tool → Results → Agent → Answer / Search Again / Clarification.
-Each iteration the model returns `{"action": "search|answer|clarify", ...}` based on
-the previous tool result: weak/empty evidence triggers a reformulated search, no
-evidence after retries triggers clarification, sufficient evidence triggers the answer.
-
-## Context Engineering Technique
-
-Retrieval result capping: `agent.py` keeps only the top 5 results per search and top 5
-overall (`TOP_K_CAP = 5`). Repeated searches can otherwise cause the context to grow
-unnecessarily, so limiting the results keeps the agent's context manageable.
-
 ## Agentic Pattern
 
 Single-agent loop (`run_agent`, max 5 iterations): each iteration the model returns
